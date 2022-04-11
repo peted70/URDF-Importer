@@ -22,6 +22,11 @@ namespace Unity.Robotics.UrdfImporter.Editor
     {
         private Vector3 testVector;
 
+        bool ResetInertialsButton()
+        {
+            return GUILayout.Button("Reset Overrides");
+        }
+
         public override void OnInspectorGUI()
         {
             UrdfInertial urdfInertial = (UrdfInertial) target;
@@ -31,18 +36,31 @@ namespace Unity.Robotics.UrdfImporter.Editor
                 EditorGUILayout.ToggleLeft("Display Inertia Gizmo", urdfInertial.displayInertiaGizmo);
             GUILayout.Space(5);
 
-            bool newValue = EditorGUILayout.BeginToggleGroup("Use URDF Data", urdfInertial.useUrdfData);
-            EditorGUILayout.Vector3Field("URDF Center of Mass", urdfInertial.centerOfMass);
-            EditorGUILayout.Vector3Field("URDF Inertia Tensor", urdfInertial.inertiaTensor);
-            EditorGUILayout.Vector3Field("URDF Inertia Tensor Rotation",
-                urdfInertial.inertiaTensorRotation.eulerAngles);
+            var shouldOverride = 
+                EditorGUILayout.BeginToggleGroup("Override URDF Data", !urdfInertial.useUrdfData);
+            urdfInertial.centerOfMass = 
+                EditorGUILayout.Vector3Field("URDF Center of Mass", urdfInertial.centerOfMass);
+            urdfInertial.inertiaTensor = 
+                EditorGUILayout.Vector3Field("URDF Inertia Tensor", urdfInertial.inertiaTensor);
+            urdfInertial.inertiaTensorRotation.eulerAngles = 
+                EditorGUILayout.Vector3Field("URDF Inertia Tensor Rotation",
+                    urdfInertial.inertiaTensorRotation.eulerAngles);
+            var shouldReset = ResetInertialsButton();
             EditorGUILayout.EndToggleGroup();
 
-            if (newValue != urdfInertial.useUrdfData)
+            var toggleOccured = urdfInertial.useUrdfData == shouldOverride;
+            if (toggleOccured) 
             {
-                urdfInertial.useUrdfData = newValue;
-                urdfInertial.UpdateLinkData();
+                urdfInertial.useUrdfData = !shouldOverride;
             }
+
+            if (shouldReset)
+            {
+                urdfInertial.ResetInertial();
+                return;
+            }
+            
+            urdfInertial.UpdateLinkData(toggleOccured);
         }
     }
 }
