@@ -8,7 +8,8 @@
         "Editor",
         "LinuxStandalone64",
         "macOSStandalone",
-        "WindowsStandalone64"
+        "WindowsStandalone64",
+        "WSA"
     ],
     "excludePlatforms": [],
     "allowUnsafeCode": true,
